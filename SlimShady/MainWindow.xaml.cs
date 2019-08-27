@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
-using SlimShady.MonitorManagers;
+using SlimShady.Configuration;
+using SlimShady.UI;
+using SlimShadyCore;
+using SlimShadyCore.Monitors;
+using SlimShadyCore.Utilities;
+
 namespace SlimShady
 {
     // TODO
@@ -13,131 +15,95 @@ namespace SlimShady
     // - Add Time feed interface
     // - Implemenent 'manage profiles' setting
     // - https://github.com/MahApps/MahApps.Metro --> http://kawinski.net/szarky/share/22-04-22_24.png
-    // - Add ability to change monitor input http://www.autohotkey.com/board/topic/96884-change-monitor-input-source/
     // - Make Brightness changes smoother (up to 5% per second? and 1% when there is less than 10% left)
+    // - window structure { window -> list managers in tabs } { manager -> list monitors vertical stackpanel }
+    // - Add refresh & apply buttons in HW manager to refresh monitor settings to real, or force set values from the slimshady 
+    //       (maybe recurring task that checks for app/real values difference and asks whether refresh/reapply)
     public partial class MainWindow : Window
     {
-        public static MainWindow Instance;
         // ReSharper disable once NotAccessedField.Local - It would be otherwise garbage collected. ShortcutsMgr is standalone
-        private Shortcuts shortcutsMgr;
-        public static List<MonitorManager> MonitorManagers = new List<MonitorManager> { HardwareMonitorManager.Instance, SoftwareMonitorManager.Instance };
-        public static Configuration Config = Configuration.Get();
+        private readonly SlimApp slimMain;
+        private SlimCore slimCore => slimMain.core;
+        private ConfigurationNew slimConfig => slimMain.Config;
 
-        public static void Trace(String msg) { Console.WriteLine(@"[TRACE] {0}", msg); }
-        public static void Error(String msg) { Console.WriteLine(@"[ERROR] {0}", msg); } // TODO: alter with MessageBox.Show()
-        public static void Win32Error(String msg)
-        {
-            string errorMessage = new Win32Exception(Marshal.GetLastWin32Error()).Message;
-            Console.WriteLine(errorMessage);
-            Error(msg + "; Error: " + errorMessage);
-        }
+        private Dictionary<string, TabItem> MonitorManagersById { get; set; } = new Dictionary<string, TabItem>();
 
         public MainWindow()
         {
-            Instance = this;
-            InitializeComponent();
+            slimMain = new SlimApp();
             
-            // Show&Hide just to initialize the window so that other components can just set the position directly without worrying about the initial windows position
-            Show();
-            Hide();
-
-            // Enable configuration. First load from Config, then enable auto save
-            // Doing it in different order, would cause loading 
-            Configuration.Get().LoadFromConfig(this); // Load from Config before enabling auto save,
-            Configuration.Get().EnableAutoSave(this); // Otherwise, we would 
-
-            // Add monitor sliders
-            AddMonitorManager(MonitorManagerTabItemHardware, HardwareMonitorManager.Instance);
-            AddMonitorManager(MonitorManagerTabItemGammaRamp, GammaRampMonitorManager.Instance);
-            AddMonitorManager(MonitorManagerTabItemWmi, WmiMonitorManager.Instance);
-            AddMonitorManager(MonitorManagerTabItemSoftware, SoftwareMonitorManager.Instance);
-            HardwareMonitorManager.Instance.LinkMasterToChilds();
-            GammaRampMonitorManager.Instance.LinkMasterToChilds();
-            WmiMonitorManager.Instance.LinkMasterToChilds();
-            SoftwareMonitorManager.Instance.LinkMasterToChilds();
-
-            // Some events
-            SizeChanged += (x, y) => Application.Current.Dispatcher.BeginInvoke(new Action(AdjustSize)); // We must delay resize a bit, because the window is not yet resized at the moment of event
-            Deactivated += (x, y) => Hide();
-            
-            // Shortcuts! :D
-            shortcutsMgr = new Shortcuts();
-
-            // Add ourselves to the system tray
-            System.Windows.Forms.NotifyIcon trayIcon = new System.Windows.Forms.NotifyIcon
+            using (NkTrace trace = NkLogger.trace())
             {
-                Text = @"Monitor management",
-                Icon = new System.Drawing.Icon(System.Drawing.SystemIcons.Application, 40, 40),
-                Visible = true
-            };
-            trayIcon.MouseDown += (x, y) => { if (IsVisible) Hide(); else ShowNearMouse(); };
-            Closing += (x, y) => trayIcon.Dispose();
+                InitializeComponent();
+                ConfigurationControl.Core = slimCore;
+                
+                // Show&Hide just to initialize the window so that other components can just set the position directly without worrying about the initial windows position
+                Show();
+                Hide();
 
-            // Add auto Brightness adjustments using data feed
-            DispatcherTimer dispatcher = new DispatcherTimer();
-            dispatcher.Tick += (x, y) =>
-            {
-                if(AutoCheckBox.IsChecked ?? true)
-                    Configuration.DataFeed.AdjustMonitorSettings(Configuration.MonitorManager);
-            };
-            dispatcher.Interval = new TimeSpan(0, 0, 0, 0, 1000);
-            dispatcher.Start();
+                // Add monitor sliders
+                // TODO: Use ItemsSource with binding on core.ActiveMonitorManagers; See ConfigurationControl and MonitorManagerControl classess for reference
+                // This way, we'll be able to dynamically add/remove monitor managers via ConfigurationControl
+                foreach (MonitorManager manager in slimCore.ActiveMonitorManagers)
+                    AddMonitorManager(manager, slimConfig.GetOrCreateManager(manager));
+                
+                // Some events
+                SizeChanged += (x, y) => Application.Current.Dispatcher.BeginInvoke(new Action(AdjustSize)); // We must delay resize a bit, because the window is not yet resized at the moment of event
+                Deactivated += (x, y) => Hide();
 
-            // Just testing things here. Remove later
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => { Show(); Activate(); }));
+                // Add ourselves to the system tray
+                System.Windows.Forms.NotifyIcon trayIcon = new System.Windows.Forms.NotifyIcon
+                {
+                    Text = @"Monitor management",
+                    Icon = new System.Drawing.Icon(System.Drawing.SystemIcons.Application, 40, 40),
+                    Visible = true
+                };
+                trayIcon.MouseDown += (x, y) => { if (IsVisible) Hide(); else ShowNearMouse(); };
+                Closing += (x, y) => trayIcon.Dispose();
+
+                // Just testing things here. Remove later
+                Application.Current.Dispatcher.BeginInvoke(new Action(() => { Show(); Activate(); }));
+
+                InitializeActiveManagerSelection();
+            }
         }
 
-        private void AddMonitorManager(TabItem tab, MonitorManager manager)
+        private void InitializeActiveManagerSelection()
         {
-            Trace("");
-            Trace("Adding monitor Manager: " + manager.GetType().Name);
-            StackPanel tabContent = new StackPanel() { Orientation = Orientation.Vertical };
-            tab.Content = tabContent;
+            // Select active mgr
+            string activeManagerId = slimConfig.UI.ActiveMonitorManager;
+            if (activeManagerId != null && MonitorManagersById.ContainsKey(activeManagerId))
+                MonitorManagerTabControl.SelectedItem = MonitorManagersById[activeManagerId];
 
-            MonitorSliders masterSlider = new MonitorSliders(manager.MasterMonitor);
-            tabContent.Children.Add(masterSlider);
-            
-            int supportBrightness = 0;
-            int supportContrast = 0;
-            int supportTemperature = 0;
-            List<Monitor> monitors = manager.GetMonitorsList();
-            foreach (Monitor monitor in monitors)
+            // Setup auto-save new active mgrs
+            MonitorManagerTabControl.SelectionChanged += (x, y) =>
             {
-                Trace("- " + monitor.ToStringDbg());
-                MonitorSliders slider = new MonitorSliders(monitor);
-                tabContent.Children.Add(slider);
-                if (monitor.SupportsBrightness)
-                    supportBrightness++;
-                if (monitor.SupportsContrast)
-                    supportContrast++;
-                if (monitor.SupportsTemperature)
-                    supportTemperature++;
-            }
+                foreach(var entry in MonitorManagersById)
+                {
+                    if (entry.Value.IsSelected)
+                        slimConfig.UI.ActiveMonitorManager = entry.Key;
+                }
+            };
+        }
 
-            // "< 2" or "== 0" whichever works better
-            if (supportBrightness == 0)
-            {
-                masterSlider.BrightnessSliderLabel.Visibility = Visibility.Collapsed;
-                masterSlider.BrightnessSlider.Visibility = Visibility.Collapsed;
-                masterSlider.BrightnessSliderText.Visibility = Visibility.Collapsed;
-            }
-            if (supportContrast == 0)
-            {
-                masterSlider.ContrastSliderLabel.Visibility = Visibility.Collapsed;
-                masterSlider.ContrastSlider.Visibility = Visibility.Collapsed;
-                masterSlider.ContrastSliderText.Visibility = Visibility.Collapsed;
-            }
-            if (supportTemperature == 0)
-            {
-                masterSlider.TemperatureSliderLabel.Visibility = Visibility.Collapsed;
-                masterSlider.TemperatureSlider.Visibility = Visibility.Collapsed;
-                masterSlider.TemperatureSliderText.Visibility = Visibility.Collapsed;
-            }
+        private void AddMonitorManager(MonitorManager manager, MonitorManagerConfiguration managerConfig)
+        {
+            TabItem tab = new TabItem();
+            tab.Header = manager.DispName;
+            tab.Content = new MonitorManagerControl(manager, managerConfig);
+            MonitorManagersById.Add(manager.Id, tab);
+            MonitorManagerTabControl.Items.Add(tab);
         }
 
         private void CloseButtonClick(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            Hide();
+
+            foreach(MonitorManager mm in slimCore.ActiveMonitorManagers)
+                mm.Dispose();
+
+            //Application.Current.Shutdown();
+            Environment.Exit(0); // Workaround for task cancelled exception bug in .NET
         }
 
         private void ShowNearMouse()

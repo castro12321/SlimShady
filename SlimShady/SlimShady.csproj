@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SlimShady</RootNamespace>
     <AssemblyName>SlimShady</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -34,7 +34,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeAnalysis">
       <HintPath>..\packages\Microsoft.CodeAnalysis.Common.1.0.0\lib\net45\Microsoft.CodeAnalysis.dll</HintPath>
     </Reference>
@@ -83,30 +89,34 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ConfigurationControl.xaml.cs">
+    <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="Configuration\ConfigurationHelper.cs" />
+    <Compile Include="Configuration\ConfigurationSaver.cs" />
+    <Compile Include="Configuration\MonitorConfiguration.cs" />
+    <Compile Include="Configuration\MonitorManagerConfiguration.cs" />
+    <Compile Include="Configuration\UiConfiguration.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SlimApp.cs" />
+    <Compile Include="UI\Configuration\ConfigurationControl.xaml.cs">
       <DependentUpon>ConfigurationControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConfigurationFile.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="DataFeed\ThingSpeakLightConverter.cs" />
-    <Compile Include="MonitorManagers\GammaRampMonitorManager.cs" />
-    <Compile Include="MonitorManagers\GammaRampMonitor.cs" />
-    <Compile Include="MonitorManagers\SoftwareMonitorWindowOverlay.cs" />
-    <Compile Include="MonitorManagers\WmiMonitor.cs" />
-    <Compile Include="MonitorManagers\WmiMonitorManager.cs" />
-    <Compile Include="MonitorManagers\HardwareMonitorManager.cs" />
-    <Compile Include="MonitorManagers\MonitorManager.cs" />
-    <Compile Include="MonitorManagers\Monitor.cs" />
-    <Compile Include="MonitorManagers\MasterMonitor.cs" />
-    <Compile Include="MonitorManagers\HardwareMonitor.cs" />
-    <Compile Include="MonitorManagers\SoftwareMonitorManager.cs" />
-    <Compile Include="MonitorManagers\SoftwareMonitor.cs" />
-    <Compile Include="CommandMgr.cs" />
-    <Compile Include="MonitorSettingsEntry.cs" />
-    <Compile Include="OxyModel.cs" />
-    <Compile Include="Shortcuts.cs" />
-    <Compile Include="Utils.cs" />
-    <Page Include="ConfigurationControl.xaml">
+    <Compile Include="DataFeed\ThingSpeak\ThingSpeakLightConverter.cs" />
+    <Compile Include="UI\Configuration\DataFeedConfigControl.xaml.cs">
+      <DependentUpon>DataFeedConfigControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Configuration\MonitorManagerConfigControl.xaml.cs">
+      <DependentUpon>MonitorManagerConfigControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\MonitorManagerControl.xaml.cs">
+      <DependentUpon>MonitorManagerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Configuration\OxyModel.cs" />
+    <Compile Include="UI\TrayHelper.cs" />
+    <Page Include="UI\Configuration\ConfigurationControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -118,18 +128,30 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DataFeed\ThingSpeakDataFeed.cs" />
+    <Compile Include="DataFeed\ThingSpeak\ThingSpeakDataFeed.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="MonitorSliders.xaml">
+    <Page Include="UI\Configuration\DataFeedConfigControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Configuration\MonitorManagerConfigControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\MonitorManagerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\MonitorSliders.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MonitorSliders.xaml.cs">
+    <Compile Include="UI\MonitorSliders.xaml.cs">
       <DependentUpon>MonitorSliders.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -143,6 +165,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -191,6 +214,17 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Media\SettingsIcon.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\SlimShadyCore\SlimShadyCore.csproj">
+      <Project>{3571a2b1-a43d-443c-aee9-f984840adabc}</Project>
+      <Name>SlimShadyCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SlimShadyEssentials\SlimShadyEssentials.csproj">
+      <Project>{5ee4c856-cb96-45db-82dd-c4d4bf036355}</Project>
+      <Name>SlimShadyEssentials</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

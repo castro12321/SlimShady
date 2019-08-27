@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimShady", "SlimShady\SlimShady.csproj", "{774A438D-B2FC-41D8-9D0E-385DD0DA42B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimShadyEssentials", "SlimShadyEssentials\SlimShadyEssentials.csproj", "{5EE4C856-CB96-45DB-82DD-C4D4BF036355}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimShadyCore", "SlimShadyCore\SlimShadyCore.csproj", "{3571A2B1-A43D-443C-AEE9-F984840ADABC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +19,19 @@ Global
 		{774A438D-B2FC-41D8-9D0E-385DD0DA42B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{774A438D-B2FC-41D8-9D0E-385DD0DA42B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{774A438D-B2FC-41D8-9D0E-385DD0DA42B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EE4C856-CB96-45DB-82DD-C4D4BF036355}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EE4C856-CB96-45DB-82DD-C4D4BF036355}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EE4C856-CB96-45DB-82DD-C4D4BF036355}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EE4C856-CB96-45DB-82DD-C4D4BF036355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3571A2B1-A43D-443C-AEE9-F984840ADABC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3571A2B1-A43D-443C-AEE9-F984840ADABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3571A2B1-A43D-443C-AEE9-F984840ADABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3571A2B1-A43D-443C-AEE9-F984840ADABC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {13B19CEB-5E53-45EB-B68D-4116EBFA71F8}
 	EndGlobalSection
 EndGlobal

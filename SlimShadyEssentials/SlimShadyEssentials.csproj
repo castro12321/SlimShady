@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5EE4C856-CB96-45DB-82DD-C4D4BF036355}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SlimShadyEssentials</RootNamespace>
+    <AssemblyName>SlimShadyEssentials</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EssentialsMain.cs" />
+    <Compile Include="Monitors\Gamma\Components\GammaBrigthnessComponent.cs" />
+    <Compile Include="Monitors\Gamma\GammaRampMonitor.cs" />
+    <Compile Include="Monitors\Gamma\GammaRampMonitorManager.cs" />
+    <Compile Include="Monitors\Hardware\Components\HardwareBrightnessComponent.cs" />
+    <Compile Include="Monitors\Hardware\Components\HardwareContrastComponent.cs" />
+    <Compile Include="Monitors\Hardware\Components\HardwareInputSourceComponent.cs" />
+    <Compile Include="Monitors\Hardware\HardwareMonitor.cs" />
+    <Compile Include="Monitors\Hardware\HardwareMonitorManager.cs" />
+    <Compile Include="Monitors\Hardware\Components\HardwareTemperatureComponent.cs" />
+    <Compile Include="Monitors\Hardware\PhysicalMonitor.cs" />
+    <Compile Include="Monitors\Hardware\PhysicalMonitorManager.cs" />
+    <Compile Include="Monitors\Hardware\vcp\CapabilitiesNode.cs" />
+    <Compile Include="Monitors\Hardware\vcp\Edid.cs" />
+    <Compile Include="Monitors\Hardware\vcp\InputSource.cs" />
+    <Compile Include="Monitors\Hardware\vcp\MonitorCapabilities.cs" />
+    <Compile Include="Monitors\Hardware\vcp\MonitorCapabilitiesParser.cs" />
+    <Compile Include="Monitors\Hardware\vcp\Vcp.cs" />
+    <Compile Include="Monitors\Master\Components\MasterBrightnessComponent.cs" />
+    <Compile Include="Monitors\Master\Components\MasterContrastComponent.cs" />
+    <Compile Include="Monitors\Master\Components\MasteredBrightnessComponent.cs" />
+    <Compile Include="Monitors\Master\Components\MasteredComponentUtils.cs" />
+    <Compile Include="Monitors\Master\Components\MasteredContrastComponent.cs" />
+    <Compile Include="Monitors\Master\MasteredMonitor.cs" />
+    <Compile Include="Monitors\Master\MasterMonitor.cs" />
+    <Compile Include="Monitors\Master\MasterMonitorManager.cs" />
+    <Compile Include="Monitors\Software\Components\SoftwareBrightnessComponent.cs" />
+    <Compile Include="Monitors\Software\SoftwareMonitor.cs" />
+    <Compile Include="Monitors\Software\SoftwareMonitorManager.cs" />
+    <Compile Include="Monitors\Software\SoftwareMonitorWindowOverlay.cs" />
+    <Compile Include="Monitors\Wmi\Components\WmiBrightnessComponent.cs" />
+    <Compile Include="Monitors\Wmi\WmiMonitor.cs" />
+    <Compile Include="Monitors\Wmi\WmiMonitorManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SlimShadyCore\SlimShadyCore.csproj">
+      <Project>{6ade1e7a-3af5-4ad6-aeb3-6c964833cd1c}</Project>
+      <Name>SlimShadyCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
